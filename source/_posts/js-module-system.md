@@ -93,7 +93,7 @@ module.exports = (width) => {
 
 - 同步API使得其不适合特定需求（客户端）
 - 一个文件一个模块
-- 浏览器需要一个加载库
+- 如果不用转译器则浏览器需要一个加载库
 - 模块没有构造函数（但Node支持）
 - 难以分析静态代码分析器
 
@@ -203,7 +203,43 @@ System.import('some_module')
 
 ### 实现
 
-不幸的是当前并没有主流的JS运行环境稳定版支持ES2015模块。这意味着这不在Firefox, Chrome或Node.js被支持。幸运的是
+不幸的是当前并没有主流的JS运行环境稳定版支持ES2015模块。这意味着这不在Firefox, Chrome或Node.js被支持。幸运的是很多转译器支持模块还有可以使用[polyfill](https://github.com/ModuleLoader/es-module-loader)。当前将[Babel](https://babeljs.io/)预置ES2015可以处理模块问题。
+
+## 一体化解决办法： System.js
+
+你可以使用一个模块系统移除遗留代码问题，或者你会想无论怎么处理，你选择的方法都能正常运作。[System.js](https://github.com/systemjs/systemjs)：一个支持Common.js，AMD和ES2015模块的通用加载器。这可以串联其他转译器如Babel或Traceur，并支持Node和IE8+环境。
+在你的代码加载System.js并指定基本url：
+
+```
+   <script src="system.js"></script>
+    <script>
+      // set our baseURL reference path
+      System.config({
+        baseURL: '/app',
+        // or 'traceur' or 'typescript'
+        transpiler: 'babel',
+        // or traceurOptions or typescriptOptions
+        babelOptions: {
+
+        }
+      });
+
+      // loads /app/main.js
+      System.import('main.js');
+    </script>
+```
+因为System.js在运行时执行，在生产环境中应该先在构建阶段使用转译器转译使用ES2015模块。不在生产环境时，System.js可以调用转译器，提供生产和调试环境的无缝过渡。
+
+## 总结
+
+在过去构建模块和处理依赖一直是一大问题。一些更新的方法如ES2015模块和一些库解决了大部分问题。如果你想开始使用一个新模块，ES2015是一个很好的方式。这将一直支持而当前通过使用转译器可以支持，相关的polyfill也做得很好。
+此外，如果你想坚持使用ES5，一般使用AMD用于客户端，使用CommonJS/Node用于服务端。
+
+
+
+
+
+
 
 
 
