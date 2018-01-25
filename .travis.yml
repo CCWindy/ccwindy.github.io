@@ -17,10 +17,6 @@ before_script:
 - sed -i "s/__GITHUB_TOKEN__/${__GITHUB_TOKEN__}/" _config.yml
 script:
 - hexo deploy
-deploy:
-  type: git
-  repo: https://__GITHUB_TOKEN__@github.com/CCWindy/ccwindy.github.io.git
-  branch: master
 notifications:
   email:
     recipients:
