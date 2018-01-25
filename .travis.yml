@@ -1,0 +1,29 @@
+language: node_js
+node_js: 8
+branches:
+  only:
+  - master
+env:
+  global:
+  - secure: mzZipG5ASOSlyw6cdFTZ18LKmrlgMFe6+WSerYpumWAedxYCeq8nlOEqeZPS31nJ6qz0t3zRtVPn8tkmRbN4EoPmugAcQyfybD9aC8O31mWgz2KShaX69zPu9z3dknO4kidbF79PRCyy+Uj0zecHcIkzRtZf21Cjjb2ABYkHw2CNsoXO/K3ZD/253PTUUUEZnltyctu92QdIRO2SbUiAhj9ouVzdzUH+xLNUmCcITTZXv491wYhbl1TonRsxQk5gh3ccgmM7AR3I3wvaPsHuVHgYdD7KbF0NkW33W1ANA6uaGCqwNTZnUmlQ4o4KrshJoROjkLPYWu/g5R/cGcxDEnZp1WJucWikv/pgNqg7LCXZqG3NJKWhxFYvKzBwwx39bEQvXVhfMb21d7ht1ecVlQURBbf6I7s1FUxkehFcoNAo1hxLDfuEohZSeRzinnuKeb4QpsULnY/uD4eL0FqshYfCdidOT3DNRotRKr19xzMgBUUDzso+LZqZpX54IG0TWE2vRNAxvePB1iiEQ13pySOYEftX6wtGMicYRzNWeAkum4NVzfCFQFUFe9MDIqs6Rbt2RErQaKZWkFilJS6PP1+lFyDYROPCwDDlCrpQhq7Sa8vP24Pur3G4rPn0IaX68kZUnHF66/N+oE1MJnKw7ZSOYWYYbJuzPmmyqID+TJI=
+before_install:
+- npm install -g hexo-cli
+- npm install
+install:
+- hexo generate
+before_script:
+- git config --global user.name 'windy'
+- git config --global user.email 'chenchuowen@foxmail.com'
+- sed -i "s/__GITHUB_TOKEN__/${__GITHUB_TOKEN__}/" _config.yml
+script:
+- hexo deploy
+deploy:
+  type: git
+  repo: https://__GITHUB_TOKEN__@github.com/CCWindy/ccwindy.github.io.git
+  branch: master
+notifications:
+  email:
+    recipients:
+    - chenchuowen@foxmail.com
+    on_success: never
+    on_failure: always
