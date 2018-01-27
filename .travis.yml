@@ -15,7 +15,7 @@ install:
 before_script:
 - git config --global user.name 'windy'
 - git config --global user.email 'chenchuowen@foxmail.com'
-- sed -i "s/__GITHUB_TOKEN__/${__GITHUB_TOKEN__}/" _config.yml
+- sed -i'' "s~git@github.com:CCWindy/ccwindy.github.io.git~https://${__GITHUB_TOKEN__}:x-oauth-basic@github.com/CCWindy/ccwindy.github.io.git~" _config.yml
 script:
 - hexo deploy
 notifications:
