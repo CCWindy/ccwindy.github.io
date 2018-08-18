@@ -52,7 +52,7 @@ HTTP协议是基于TCP/IP协议，TPC协议提供可靠的连接服务，连接�
 
 ### 浏览器解析HTML文件
 
-{% browser_flow.png 呈现引擎的基本流程 %}
+{% asset_img browser_flow.png 呈现引擎的基本流程 %}
 
 1. 浏览器呈现引擎将开始解析HTML文档，并将各标记逐个转换成“内容树"上的DOM节点
 2. 浏览器呈现殷勤同时解析CSS文件及样式元素生成呈现树。不可见的如head元素，display为none的元素是不会加到呈现树中。
