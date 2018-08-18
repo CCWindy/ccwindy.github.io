@@ -1,5 +1,6 @@
 ---
 title: source map 学习记录
+date: 2018-01-16
 ---
 
 问题源于在chrome调试网页想改某元素样式时，发现修改的样式是在style.scss文件上的，然而检查当前元素所在html文件，仅引用了styleA.css文件，并没发现其对styleA.scss文件及没有不同名的style.scss文件的引用，这让我觉得十分怪异。

@@ -1,5 +1,6 @@
 ---
 title: JS模块小结
+date: 2018-01-17
 ---
 
 一直理不清AMD, COMMONJS, UMD, ES6这些JS模块的区别，这几天一直在看相关内容。
