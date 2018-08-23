@@ -73,15 +73,15 @@ www.evil.com 便可得到用户在该网站的cookie信息了。
 
 #### 1. 对输入值进行转义
 
-其实本质就是不相信任何用户输入，不能将用户输入直接写到HMLT DOM结果里。若网站开发者将留言板的输入信息过滤掉<scirpt></sciprt>这个HTML元素，其中的JS代码将不会被浏览器解析危害用户了。开发者可使用以下[规则](https://www.owasp.org/index.php/XSS_(Cross_Site_Scripting)_Prevention_Cheat_Sheet)对输入值进行转义：
+其实本质就是不相信任何用户输入，不能将用户输入直接写到HMLT DOM结果里。若网站开发者将留言板的输入信息过滤掉<scirpt></sciprt>这个HTML元素，其中的JS代码将不会被浏览器解析危害用户了。开发者可使用以下[规则](https://www.owasp.org/index.php/XSS_%28Cross_Site_Scripting%29_Prevention_Cheat_Sheet)对输入值进行转义：
 
 | 转义类型 | 转义方式 |
 | ------- | --------------------------------------- |
-| HTML实体转义 | ```&``` 转为 ```&amp;``` <br> ```<``` 转为 ```&lt;``` <br> ```>``` 转为 ```&gt;``` <br> ```"``` 转为 ```&quot;``` <br> ```'``` 转为 ```&#27;``` <br> ```/``` 转为 ```&#x2F;``` |
-| HTML属性编码 | 除了字母，转换所有字符为```&#xHH```;形式，包括空格（HH = Hex数值）    |
+| HTML实体转义 | &amp; 转为  &amp;amp; <br> &lt; 转为 `&amp;lt; <br> &gt; 转为 &amp;gt; <br> &quot; 转为 &amp;quot; <br> &#27; 转为 &amp;#27; <br> &#x2F; 转为 &amp;#x2F; |
+| HTML属性编码 | 除了字母，转换所有字符为&amp;#xHH;形式，包括空格（HH = Hex数值）    |
 | URL编码     | URL编码应该只用于参数部分，而不是整个URL或URL路径部分。<br> 标准的编码可参考 http://www.w3schools.com/tags/ref_urlencode.asp    |
-| JavaScript编码  | 除了字母，转换所有字符为```\uXXXX```的unicode转义形式（X=整数）     |
-| CSS Hex编码   |  CSS转义支持```\XX```和```\XXXXXX```的形式。如果下一个字符会继续转义序列，那使用两个字符的转义形式可能会出现问题。<br> 有两种解决办法（a）在CSS转义后添加一个空格（会被CSS解析器忽略）（b）使用0填充以实现完整的CSS转义格式。 |
+| JavaScript编码  | 除了字母，转换所有字符为 \uXXXX 的unicode转义形式（X=整数）     |
+| CSS Hex编码   |  CSS转义支持 \XX 和 \XXXXXX 的形式。如果下一个字符会继续转义序列，那使用两个字符的转义形式可能会出现问题。<br> 有两种解决办法（a）在CSS转义后添加一个空格（会被CSS解析器忽略）（b）使用0填充以实现完整的CSS转义格式。 |
 
 如用户输入内容是：
 ```
