@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="HTTP cache," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="当用户重新访问一个网站时，很多时候请求的数据内容（包含文件和 API 响应数据）都是相同并未改变的。 浏览器及代理服务器等已实现了本地缓存功能，若服务器对这些不变的数据内容进行再次返回，将对网络资源造成不必要的浪费。 HTTP 协议提供了多种用于缓存控制的头部字段，本文将对这些字段进行总结与对比。">
+<meta name="keywords" content="HTTP cache">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HTTP 缓存">
+<meta property="og:url" content="https://ccwindy.github.io/http-cache/index.html">
+<meta property="og:site_name" content="CCWindy&#39;s Blog">
+<meta property="og:description" content="当用户重新访问一个网站时，很多时候请求的数据内容（包含文件和 API 响应数据）都是相同并未改变的。 浏览器及代理服务器等已实现了本地缓存功能，若服务器对这些不变的数据内容进行再次返回，将对网络资源造成不必要的浪费。 HTTP 协议提供了多种用于缓存控制的头部字段，本文将对这些字段进行总结与对比。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-09-05T07:47:49.191Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="HTTP 缓存">
+<meta name="twitter:description" content="当用户重新访问一个网站时，很多时候请求的数据内容（包含文件和 API 响应数据）都是相同并未改变的。 浏览器及代理服务器等已实现了本地缓存功能，若服务器对这些不变的数据内容进行再次返回，将对网络资源造成不必要的浪费。 HTTP 协议提供了多种用于缓存控制的头部字段，本文将对这些字段进行总结与对比。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://ccwindy.github.io/http-cache/"/>
+
+
+
+
+
+  <title>HTTP 缓存 | CCWindy's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">CCWindy's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://ccwindy.github.io/http-cache/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Windy Chan">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="CCWindy's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">HTTP 缓存</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-08-27T00:00:00+08:00">
+                2018-08-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>当用户重新访问一个网站时，很多时候请求的数据内容（包含文件和 API 响应数据）都是相同并未改变的。
+浏览器及代理服务器等已实现了本地缓存功能，若服务器对这些不变的数据内容进行再次返回，将对网络资源造成不必要的浪费。
+HTTP 协议提供了多种用于缓存控制的头部字段，本文将对这些字段进行总结与对比。
+<a id="more"></a></p>
+<h3 id="HTTP-1-0-的缓存技术"><a href="#HTTP-1-0-的缓存技术" class="headerlink" title="HTTP 1.0  的缓存技术"></a>HTTP 1.0  的缓存技术</h3><h4 id="1-Pragma"><a href="#1-Pragma" class="headerlink" title="1. Pragma"></a>1. Pragma</h4><p>HTTP 1.0 使用 <a href="https://www.w3.org/Protocols/HTTP/1.0/spec.html#Pragma" target="_blank" rel="noopener">Pragma</a> 请求头字段禁止直接使用缓存，将 Pragma 的值设为 <code>no-cache</code> 将强制客户端不使用缓存直接向服务器进行请求。
+在 HTTP 1.1 协议中，设置 Pragma 字段值( HTTP 1.1 中 Pragma 字段值也只能设为 <code>no-cache</code> )和将 Cache-Control 字段值设为 <code>no-cache</code> 的作用是一样的。
+但当发送 <code>no-cache</code> 请求时，客户端也应同时为请求头部加上 Pragma 和 Cache-Control 字段以<a href="https://tools.ietf.org/html/rfc7234#section-5.4" target="_blank" rel="noopener">兼容服务器不能理解 Cache-Control 的情况</a>。</p>
+<h4 id="2-Expires"><a href="#2-Expires" class="headerlink" title="2. Expires"></a>2. Expires</h4><p>Pragma 字段用于在请求时禁止直接使用缓存，可以说 Expires 字段用于启用缓存。
+服务器通过给响应头部的 Expires 字段设置值可以通过规定了缓存过期时间启用缓存，如 Mon, 27 Aug 2018 08:28:13 GMT。
+需要注意的是该时间是服务器上设置的时间，若服务器上的时间和客户端时间并不一致，该缓存过期时间便可能没有意义了。
+这个问题 HTTP 1.1 通过给 Cache-Control 字段设定 max-age 的相对时间值进行解决。</p>
+<h4 id="3-Last-Modified-和-If-Modified-Since"><a href="#3-Last-Modified-和-If-Modified-Since" class="headerlink" title="3. Last-Modified 和 If-Modified-Since"></a>3. Last-Modified 和 If-Modified-Since</h4><p>Pragma 字段使得每次请求都不使用缓存而向服务器请求数据以保证数据的准确性，但如果每次服务器收到请求都不管数据有没有改变就直接返回数据就浪费了网络资源了。
+使用 Last-Modified 和 If-Modified-Since 可以帮助服务器判断客户端的内容是否已为最新内容。
+服务器响应头使用 Last-Modified 字段记录该数据最后更改时间，客户端再次向服务器请求这个数据时，在请求头加上 If-Modified-Since 字段并将字段值设为上次请求服务器响应的 Last-Modified 字段值。
+服务器收到请求后便可以通过判断 If-Modified-Since 字段值和数据最后修改时间是否一致，一致的话服务器仅需要返回含 304 状态码响应体为空的响应信息给客户端，客户端便知道这个请求文件没有被修改，使用浏览器缓存即可。
+然而 Last-Modified 使用了 GMT 时间最多只能精确到1秒，1秒内发生的变化并不能准备进行数据响应。
+此外只要是服务器的数据更新了， Last-Modified 字段值便会变化，有可能会出现文件更新了，但实际上里面的数据内容并没有修改，这种情况服务器也会将文件数据放进响应体进行响应，造成不必要的网络资源浪费及延时。
+这些问题 HTTP 1.1 新增了 ETag 和 If-None-Match 字段进行解决。</p>
+<h3 id="HTTP-1-1-的缓存技术"><a href="#HTTP-1-1-的缓存技术" class="headerlink" title="HTTP 1.1  的缓存技术"></a>HTTP 1.1  的缓存技术</h3><h4 id="1-Cache-Control"><a href="#1-Cache-Control" class="headerlink" title="1. Cache-Control"></a>1. Cache-Control</h4><p>可以说 HTTP 1.1 使用了 Cache-Control 对 HTTP1.0 中的 Pragma 及 Expires 字段功能进行了整合和优化。
+如 <code>Cache-Control: no-cache</code> 可以禁止缓存， <code>Cache-Control: max-age=3600</code> 启用缓存并设置了缓存过期时间为 3600 秒之后。
+此外，Cache-Control 还可以同时配置多个值实现提供对缓存条件的设置。
+如 <code>Cache-Control: max-age=3600, public </code> 不仅规定了缓存将在1小时后过期，还通过 <code>public</code> 规定了可以在代理服务器上进行缓存。</p>
+<p>作为<a href="https://tools.ietf.org/html/rfc7234#section-5.2.1" target="_blank" rel="noopener">请求头部字段</a>，Cache-Control的可选值有：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段名称</th>
+<th style="text-align:left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">no-cache</td>
+<td style="text-align:left">告知（代理）服务器不直接使用缓存而需向服务器发送请求</td>
+</tr>
+<tr>
+<td style="text-align:left">no-store</td>
+<td style="text-align:left">所有内容都不会被保存在缓存中</td>
+</tr>
+<tr>
+<td style="text-align:left">max-age = delta-seconds</td>
+<td style="text-align:left">告知（代理）服务器客户端希望收到存在时间 （Age) 不大于 delta-seconds 秒的资源</td>
+</tr>
+<tr>
+<td style="text-align:left">max-stale [ = delta-seconds ]</td>
+<td style="text-align:left">告知（代理）服务器客户端愿意收到超过缓存时间的资源，若有定义 delta-seconds 则为 delta-seconds 秒，没有则为超出任何时间</td>
+</tr>
+<tr>
+<td style="text-align:left">min-fresh = delta-seconds</td>
+<td style="text-align:left">告知（代理）服务器客户端希望接收一个在小于 delta-seconds 秒内被更新过的资源</td>
+</tr>
+<tr>
+<td style="text-align:left">no-transform</td>
+<td style="text-align:left">告知（代理）服务器客户端希望收到实体数据没有被转换（比如压缩）过的资源</td>
+</tr>
+<tr>
+<td style="text-align:left">only-if-cached</td>
+<td style="text-align:left">告知（代理）服务器客户端希望获取缓存内容（若有）而不去向服务器发送请求</td>
+</tr>
+<tr>
+<td style="text-align:left">cache-extension</td>
+<td style="text-align:left">自定义扩展值，若服务器不识别该值将被忽略掉</td>
+</tr>
+</tbody>
+</table>
+<p>作为<a href="https://tools.ietf.org/html/rfc7234#section-5.2.2" target="_blank" rel="noopener">响应头部字段</a>，Cache-Control的可选值有：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段名称</th>
+<th style="text-align:left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">public</td>
+<td style="text-align:left">表明任何情况下都得缓存该资源（即使需要 HTTP 认证的资源）</td>
+</tr>
+<tr>
+<td style="text-align:left">private [ = “file-name”]</td>
+<td style="text-align:left">表明返回报文中全部或部分（若指定了 file-name 则为 file-name 的字段数据）仅开放给某些用户做缓存使用，其他用户则不能缓存这些数据</td>
+</tr>
+<tr>
+<td style="text-align:left">no-transform</td>
+<td style="text-align:left">告知客户端希望收到的实体数据不能做任何改变</td>
+</tr>
+<tr>
+<td style="text-align:left">no-cache</td>
+<td style="text-align:left">强制任何情况下需先发送请求确认缓存（新鲜度验证）为最新再使用缓存</td>
+</tr>
+<tr>
+<td style="text-align:left">no-store</td>
+<td style="text-align:left">所有内容都不会被保存在缓存中</td>
+</tr>
+<tr>
+<td style="text-align:left">must-revalidate</td>
+<td style="text-align:left">当前资源一定是向原服务器发去验证请求的，若请求失败会返回504（而非代理服务器上的缓存）</td>
+</tr>
+<tr>
+<td style="text-align:left">poxy-revalidate</td>
+<td style="text-align:left">同 must-revalidate ，但仅限共享缓存（如代理）</td>
+</tr>
+<tr>
+<td style="text-align:left">max-age = delta-seconds</td>
+<td style="text-align:left">告知客户端希望收到的资源在 delta-seconds 秒内是新鲜的，不需向服务器发送请求</td>
+</tr>
+<tr>
+<td style="text-align:left">s-maxage = delta-seconds</td>
+<td style="text-align:left">同 max-age ，但仅限共享缓存（如代理）</td>
+</tr>
+<tr>
+<td style="text-align:left">no-transform</td>
+<td style="text-align:left">告知客户端希望收到的实体数据不能做任何改变</td>
+</tr>
+<tr>
+<td style="text-align:left">cache-extension</td>
+<td style="text-align:left">自定义扩展值，若客户端不识别该值将被忽略掉。</td>
+</tr>
+</tbody>
+</table>
+<h5 id="2-ETag-和-If-None-Match"><a href="#2-ETag-和-If-None-Match" class="headerlink" title="2.  ETag 和 If-None-Match"></a>2.  ETag 和 If-None-Match</h5><p>ETag 及 If-None-Match 功能和 Last-Modified 及 If-Modified-Since 功能相同，都是服务器判断客户端内容是否已为最新内容的方法。
+服务器将 ETag 字段值设置为对请求的数据内容进行 Hash 之后的值，客户端再次向服务器请求这个数据时，在请求头加上 If-None-Match 字段并将其设置为之前收到的 ETag 字段值。
+同样的，服务器收到请求后通过判断 If-None-Match 字段值的内容和对最新的数据内容进行 Hash 之后的值是否一样即可知道是否需要返回数据内容还是只是返回 304 状态码响应体为空的响应信息。
+需要注意的是，使用 ETag 是根据对数据内容进行 Hash 运算判断是否数据变化，无论数据内容多小，这也会给服务器带来一定的运算负担。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>HTTP 提供了实现缓存的多种方式，HTTP 1.1 协议中也保留了 HTTP 1.0 中的缓存字段，不仅可以解决兼容性问题，一般服务器也会优先考虑 Last-Modified 及 If-Modified-Since 字段以减少使用 ETag Hash运算对服务器性能的消耗。    </p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/HTTP-cache/" rel="tag"># HTTP cache</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/webpack-tree-shaking/" rel="next" title="Webpack打包方式">
+                <i class="fa fa-chevron-left"></i> Webpack打包方式
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/js-closure/" rel="prev" title="JS 闭包">
+                JS 闭包 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Windy Chan</p>
+              <p class="site-description motion-element" itemprop="description">Blog is how I learn.</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#HTTP-1-0-的缓存技术"><span class="nav-number">1.</span> <span class="nav-text">HTTP 1.0  的缓存技术</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-Pragma"><span class="nav-number">1.1.</span> <span class="nav-text">1. Pragma</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-Expires"><span class="nav-number">1.2.</span> <span class="nav-text">2. Expires</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-Last-Modified-和-If-Modified-Since"><span class="nav-number">1.3.</span> <span class="nav-text">3. Last-Modified 和 If-Modified-Since</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HTTP-1-1-的缓存技术"><span class="nav-number">2.</span> <span class="nav-text">HTTP 1.1  的缓存技术</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-Cache-Control"><span class="nav-number">2.1.</span> <span class="nav-text">1. Cache-Control</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#2-ETag-和-If-None-Match"><span class="nav-number">2.1.1.</span> <span class="nav-text">2.  ETag 和 If-None-Match</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Windy Chan</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

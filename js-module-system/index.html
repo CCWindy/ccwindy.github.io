@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="一直理不清AMD, COMMONJS, UMD, ES6这些JS模块的区别，这几天一直在看相关内容。 这篇文章源于Sebastián Peyrott博文。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JS模块小结">
+<meta property="og:url" content="https://ccwindy.github.io/js-module-system/index.html">
+<meta property="og:site_name" content="CCWindy&#39;s Blog">
+<meta property="og:description" content="一直理不清AMD, COMMONJS, UMD, ES6这些JS模块的区别，这几天一直在看相关内容。 这篇文章源于Sebastián Peyrott博文。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-09-05T07:47:49.191Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="JS模块小结">
+<meta name="twitter:description" content="一直理不清AMD, COMMONJS, UMD, ES6这些JS模块的区别，这几天一直在看相关内容。 这篇文章源于Sebastián Peyrott博文。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://ccwindy.github.io/js-module-system/"/>
+
+
+
+
+
+  <title>JS模块小结 | CCWindy's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">CCWindy's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://ccwindy.github.io/js-module-system/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Windy Chan">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="CCWindy's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">JS模块小结</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-17T00:00:00+08:00">
+                2018-01-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>一直理不清AMD, COMMONJS, UMD, ES6这些JS模块的区别，这几天一直在看相关内容。
+这篇文章源于<a href="https://auth0.com/blog/javascript-module-systems-showdown/" target="_blank" rel="noopener">Sebastián Peyrott博文</a>。
+<a id="more"></a></p>
+<p>当Js开发变得越来越普遍，命名空间和依赖变得越来越难处理，模块系统的出现就是想对这些问题进行解决。在这篇文章里，我们将探讨当前不同模块系统和其能够解决的问题。</p>
+<h2 id="介绍：为什么我们需要JS模块？"><a href="#介绍：为什么我们需要JS模块？" class="headerlink" title="介绍：为什么我们需要JS模块？"></a>介绍：为什么我们需要JS模块？</h2><p>如果你熟悉其他开发平台，你应该注意到<em>封装</em>和<em>依赖</em>这两个概念。一般来说，不同板块的软件是分开独立开发的，最终根据需求使用特定的板块。这时项目将引入其他模块，项目和其他代码的依赖就此产生。因为这些软件模块需要一起执行，保证它们之间不产生冲突是非常重要的。这听起来觉得很细小，但没有封装模块间产生冲突是早晚会发生的事情。这也是C语言依赖里的元素通常会使用一个前缀的一个原因。</p>
+<p>封装对于防止冲突和缓慢开发是十分重要的。</p>
+<p>当讲到依赖，在传统的客户端JS开发这是隐含的。换句话说来说，开发者的工作就是保证依赖能在任何代码段中能够成功执行。开发者同时也需要保证依赖是在对的顺序下被满足的（对某些特定库的需求）。</p>
+<p>当JS开发变得越来越复杂时，依赖管理将变得累赘。重构代码也变得受妨碍：应该将新增的依赖以什么样的顺序导入保证载入链的正确呢？</p>
+<p>JS模块系统就是为了解决这些问题。他们的诞生为了满足日益增长的JS环境。</p>
+<h2 id="一个特定解决办法：揭示模块模式"><a href="#一个特定解决办法：揭示模块模式" class="headerlink" title="一个特定解决办法：揭示模块模式"></a>一个特定解决办法：揭示模块模式</h2><p>大多数模块系统都是最近才出现的。在他们出现前，更多JS代码使用一个特定的编程模式：揭示模块模式。</p>
+<p>JS作用域（至少到ES2015 <code>let</code> 出现前）是在函数级别的。换句话说，任何声明在函数内的绑定都无法超过其作用域。正因如此，揭示模块模式依靠函数来封装私有内容（和很多其他JS模式一样）。</p>
+<p>这个模式在很长时间都被用于JS项目并很好解决了封装的问题，但它并没有解决依赖问题。合适的模块系统应该也解决依赖问题。此外，这个模式还存在一个限制：其他模块不能被用于同一个源问题（除非使用 <code>eval</code>）。</p>
+<p><strong> 优点：</strong></p>
+<ul>
+<li>足够简单到应用到任何地方（不需要库或语言支持）</li>
+<li>一个文件可以定义多个模块</li>
+</ul>
+<p><strong> 缺点：</strong></p>
+<ul>
+<li>不能通过代码方法导入模块（除非使用<code>eval</code>）</li>
+<li>依赖需要手动处理</li>
+<li>不能异步载入</li>
+<li>循环依赖变得十分复杂</li>
+<li>难以分析静态代码分析器</li>
+</ul>
+<h2 id="CommonJS"><a href="#CommonJS" class="headerlink" title="CommonJS"></a>CommonJS</h2><p>CommonJS定义了一系列服务端JS应用开发的规范。模块是CommonJS团队致力于解决的其中一个方面。Node.js开发者期初是按照CommonJS规范开发的但后来决定反对它。当说到模块，Node.js的实现一般是这样的：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">// In circle.js</span><br><span class="line">const PI = Math.PI;</span><br><span class="line">exports.area = (r) =&gt; PI * r * r;</span><br><span class="line">exports.circumference = (r) =&gt; 2 * PI * r;</span><br><span class="line"></span><br><span class="line">// In some file</span><br><span class="line">const circle = require(&apos;./circle.js&apos;);</span><br><span class="line">console.log( `The area of a circle of radius 4 is $&#123;circle.area(4)&#125;`);</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在Joyent的一个晚上，当我提到我要加一些我知道是不好的滑稽的需求时，他跟我说：“忘记CommonJS，那是死的，我们是服务端JS。”
+-<a href="https://github.com/nodejs/node-v0.x-archive/issues/5132#issuecomment-15432598" target="_blank" rel="noopener">NPM创始人Isaac Z. Schlueter引用Node.js创始人Ryan Dahl的话</a></p>
+</blockquote>
+<p>有很多基于Node.js模块系统建立Node.js模块和CommonJS桥梁的库。基于本文的目的，我们仅介绍大致相同的一些基本特征。</p>
+<p>在Node和CommonJS模块里，有两个重要的元素用于模块系统交互：<code>require</code>和<code>exports</code>。<code>require</code>是一个用于将其他模块里元素导入到当前作用域的函数。传入<code>require</code>的参数是模块的id。在Node的实现里，这是模块在<code>node_modules</code>目录中的名字（或者不在这个目录，在某路径下）。
+<code>exports</code>是一个特别的对象：任何放进里面的东西将导出为共有元素。字段名称是保留的。<code>modules.exports</code>的形式是Node和CommonJS一个特有区别。在Node里，<code>module.exports</code>是一个被导出的真实对象，而<code>exports</code>仅为一个被绑定到默认<code>module.exports</code>的变量。另一方面，CommonJS是没有<code>module.exports</code>对象。
+在Node里实际实现是不能不通过<code>module.exports</code>而导出预先构造好的对象。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">// This won&apos;t work, replacing exports entirely breaks the binding to</span><br><span class="line">// modules.exports.</span><br><span class="line">exports =  (width) =&gt; &#123;</span><br><span class="line">  return &#123;</span><br><span class="line">    area: () =&gt; width * width</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// This works as expected.</span><br><span class="line">module.exports = (width) =&gt; &#123;</span><br><span class="line">  return &#123;</span><br><span class="line">    area: () =&gt; width * width</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>要牢记CommonJS模块是被设计用于服务器开发的。本质上，其API是同步的。换句话说来说，模块是按照其在源文件中顺序被加载的。</p>
+<p><strong> 优点： </strong></p>
+<ul>
+<li>简单：开发者可以掌握其概念而不需要看文档</li>
+<li>依赖管理是集成的：模块请求和加载其他模块按照一定顺序</li>
+<li><code>require</code>可以在任何位置被调用：模块可以程序化加载</li>
+<li>支持循环依赖</li>
+</ul>
+<p><strong> 缺点： </strong></p>
+<ul>
+<li>同步API使得其不适合特定需求（客户端）</li>
+<li>一个文件一个模块</li>
+<li>如果不用转译器则浏览器需要一个加载库</li>
+<li>模块没有构造函数（但Node支持）</li>
+<li>难以分析静态代码分析器</li>
+</ul>
+<h3 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h3><p>我们已经讲到一个实现（以实际形式）：Node.js。</p>
+<p>客户端开发当前有两种欢迎的选择：<a href="https://webpack.js.org/" target="_blank" rel="noopener">webpack</a>和<a href="http://browserify.org/index.html" target="_blank" rel="noopener">browserify</a>。
+Browserify是特定被开发用于解析Node-like模块定义（很多Node包使用它能够马上工作）和将你的代码和来自其他模块的代码捆绑到一个单独文件来实现所有依赖。
+Webpack则是被开发用于处理在发布前源文件转换产生的复杂管道。这包含将各种CommonJS模块捆绑在一起。</p>
+<h2 id="异步模块定义（AMD"><a href="#异步模块定义（AMD" class="headerlink" title="异步模块定义（AMD)"></a>异步模块定义（AMD)</h2><p>AMD诞生在一组不满CommonJS采用方针的开发者中。实际上，AMD是在CommonJS早期开发分离出来的。AMD和CommonJS的主要区别在于AMD支持异步模块加载。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">//Calling define with a dependency array and a factory function</span><br><span class="line">define([&apos;dep1&apos;, &apos;dep2&apos;], function (dep1, dep2) &#123;</span><br><span class="line">    //Define the module value by returning a value.</span><br><span class="line">    return function () &#123;&#125;;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">// Or:</span><br><span class="line">define(function (require) &#123;</span><br><span class="line">    var dep1 = require(&apos;dep1&apos;),</span><br><span class="line">        dep2 = require(&apos;dep2&apos;);</span><br><span class="line"></span><br><span class="line">    return function () &#123;&#125;;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>异步加载可以用在JS传统闭包习惯中：当请求的模块被成功加载后一个函数才被调用。同一个函数可以实现模块定义和导入模块：当一个模块被定义其依赖也变得明确。
+一个AMD加载器因此可以在运行环境仲有一张复杂的依赖图。对于启动时间作为良好用户体验的浏览器来讲，这是特别重要的。</p>
+<p><strong> 优点： </strong></p>
+<ul>
+<li>异步加载（更好的启动时间）</li>
+<li>支持循环依赖</li>
+<li>兼容<code>require</code>和<code>exports</code></li>
+<li>完全继承依赖管理</li>
+<li>支持构造函数</li>
+<li>支持插件（客户载入阶段）</li>
+</ul>
+<p><strong> 缺点： </strong></p>
+<ul>
+<li>语法稍微更复杂</li>
+<li>需要加载库</li>
+<li>难以分析静态代码分析器</li>
+</ul>
+<h3 id="实现-1"><a href="#实现-1" class="headerlink" title="实现"></a>实现</h3><p><a href="http://requirejs.org/" target="_blank" rel="noopener">require.js</a>和<a href="https://dojotoolkit.org/" target="_blank" rel="noopener">Dojo</a>是当前AMD最受欢迎的实现。</p>
+<p>require.js的使用相当简单：在HTML文件中包含库和使用<code>data-main</code>属性告诉require.js先下载哪个模块。Dojo有<a href="http://dojotoolkit.org/documentation/tutorials/1.10/hello_dojo/index.html" target="_blank" rel="noopener">类似的使用</a>。</p>
+<h2 id="ES2015模块"><a href="#ES2015模块" class="headerlink" title="ES2015模块"></a>ES2015模块</h2><p>幸运地，JS标准背后的ECMA团队决定解决模块问题。最新一版的JS标准：ECMAScript 2014中可以看到成果（之前被称为ECMASript 6）。这个成果语法简单并同时兼容同步和异步操作模式。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">//------ lib.js ------</span><br><span class="line">export const sqrt = Math.sqrt;</span><br><span class="line">export function square(x) &#123;</span><br><span class="line">    return x * x;</span><br><span class="line">&#125;</span><br><span class="line">export function diag(x, y) &#123;</span><br><span class="line">    return sqrt(square(x) + square(y));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//------ main.js ------</span><br><span class="line">import &#123; square, diag &#125; from &apos;lib&apos;;</span><br><span class="line">console.log(square(11)); // 121</span><br><span class="line">console.log(diag(4, 3)); // 5</span><br></pre></td></tr></table></figure>
+<p><code>import</code>指令可以用于把模块放在命名空间里。相对<code>require</code>和<code>define</code>指令，<code>import</code>并不是动态的（它不能被调用在任何位置）。<code>export</code>指令则可以让元素公有。</p>
+<p><code>import</code>和<code>export</code>的静态特征可以使得静态分析器不用运行代码而建立完整的依赖树。ES2015不支持动态加载模块，但一份草稿规范可以：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">System.import(&apos;some_module&apos;)</span><br><span class="line">      .then(some_module =&gt; &#123;</span><br><span class="line">          // Use some_module</span><br><span class="line">      &#125;)</span><br><span class="line">      .catch(error =&gt; &#123;</span><br><span class="line">          // ...</span><br><span class="line">      &#125;);</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>实际上，ES2015<a href="https://github.com/lukehoban/es6features/issues/75" target="_blank" rel="noopener">仅描述了静态模块加载器的语法</a>，ES2015的实现并不需要在解析这些指令后做任何事。像System.js这种的模块加载器一样是需要的。有一份草案规范支持<a href="https://github.com/whatwg/loader" target="_blank" rel="noopener">浏览器模块加载</a>。</p>
+</blockquote>
+<p>这个办法通过整合到一个语言里使得运行时能选择最佳加载模块策略。换句话说说，当异步加载能获得好处，其就可以在运行时使用。</p>
+<blockquote>
+<p><strong> 更新（2017年2月）</strong>：现在有<a href="https://github.com/tc39/proposal-dynamic-import" target="_blank" rel="noopener">动态加载模块的规范</a>。这是一个未来发布的EXMASript标准提案。</p>
+</blockquote>
+<p><strong> 优点： </strong></p>
+<ul>
+<li>支持异步和同步模块加载</li>
+<li>语法简单</li>
+<li>支持静态分析工具</li>
+<li>整合到一个语言里（最终在任何位置被支持，不需要库）</li>
+<li>支持循环依赖</li>
+</ul>
+<p><strong> 缺点： </strong></p>
+<ul>
+<li>仍然不能在任何位置被支持</li>
+</ul>
+<h3 id="实现-2"><a href="#实现-2" class="headerlink" title="实现"></a>实现</h3><p>不幸的是当前并没有主流的JS运行环境稳定版支持ES2015模块。这意味着这不在Firefox, Chrome或Node.js被支持。幸运的是很多转译器支持模块还有可以使用<a href="https://github.com/ModuleLoader/es-module-loader" target="_blank" rel="noopener">polyfill</a>。当前将<a href="https://babeljs.io/" target="_blank" rel="noopener">Babel</a>预置ES2015可以处理模块问题。</p>
+<h2 id="一体化解决办法：-System-js"><a href="#一体化解决办法：-System-js" class="headerlink" title="一体化解决办法： System.js"></a>一体化解决办法： System.js</h2><p>你可以使用一个模块系统移除遗留代码问题，或者你会想无论怎么处理，你选择的方法都能正常运作。<a href="https://github.com/systemjs/systemjs" target="_blank" rel="noopener">System.js</a>：一个支持Common.js，AMD和ES2015模块的通用加载器。这可以串联其他转译器如Babel或Traceur，并支持Node和IE8+环境。
+在你的代码加载System.js并指定基本url：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">&lt;script src=&quot;system.js&quot;&gt;&lt;/script&gt;</span><br><span class="line"> &lt;script&gt;</span><br><span class="line">   // set our baseURL reference path</span><br><span class="line">   System.config(&#123;</span><br><span class="line">     baseURL: &apos;/app&apos;,</span><br><span class="line">     // or &apos;traceur&apos; or &apos;typescript&apos;</span><br><span class="line">     transpiler: &apos;babel&apos;,</span><br><span class="line">     // or traceurOptions or typescriptOptions</span><br><span class="line">     babelOptions: &#123;</span><br><span class="line"></span><br><span class="line">     &#125;</span><br><span class="line">   &#125;);</span><br><span class="line"></span><br><span class="line">   // loads /app/main.js</span><br><span class="line">   System.import(&apos;main.js&apos;);</span><br><span class="line"> &lt;/script&gt;</span><br></pre></td></tr></table></figure>
+<p>因为System.js在运行时执行，在生产环境中应该先在构建阶段使用转译器转译使用ES2015模块。不在生产环境时，System.js可以调用转译器，提供生产和调试环境的无缝过渡。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>在过去构建模块和处理依赖一直是一大问题。一些更新的方法如ES2015模块和一些库解决了大部分问题。如果你想开始使用一个新模块，ES2015是一个很好的方式。这将一直支持而当前通过使用转译器可以支持，相关的polyfill也做得很好。
+此外，如果你想坚持使用ES5，一般使用AMD用于客户端，使用CommonJS/Node用于服务端。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/source-map/" rel="next" title="source map 学习记录">
+                <i class="fa fa-chevron-left"></i> source map 学习记录
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/process-of-web-request/" rel="prev" title="网页请求过程">
+                网页请求过程 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Windy Chan</p>
+              <p class="site-description motion-element" itemprop="description">Blog is how I learn.</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#介绍：为什么我们需要JS模块？"><span class="nav-number">1.</span> <span class="nav-text">介绍：为什么我们需要JS模块？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#一个特定解决办法：揭示模块模式"><span class="nav-number">2.</span> <span class="nav-text">一个特定解决办法：揭示模块模式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CommonJS"><span class="nav-number">3.</span> <span class="nav-text">CommonJS</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#实现"><span class="nav-number">3.1.</span> <span class="nav-text">实现</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#异步模块定义（AMD"><span class="nav-number">4.</span> <span class="nav-text">异步模块定义（AMD)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#实现-1"><span class="nav-number">4.1.</span> <span class="nav-text">实现</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ES2015模块"><span class="nav-number">5.</span> <span class="nav-text">ES2015模块</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#实现-2"><span class="nav-number">5.1.</span> <span class="nav-text">实现</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#一体化解决办法：-System-js"><span class="nav-number">6.</span> <span class="nav-text">一体化解决办法： System.js</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">7.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Windy Chan</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
